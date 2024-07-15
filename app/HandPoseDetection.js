@@ -95,15 +95,13 @@ export default function HandPoseDetection() {
 			videoRef.current.videoHeight
 		);
 
-		if (isCameraOn) {
-			ctx.drawImage(
-				videoRef.current,
-				0,
-				0,
-				videoRef.current.videoWidth,
-				videoRef.current.videoHeight
-			);
-		}
+		// ctx.drawImage(
+		// 	videoRef.current,
+		// 	0,
+		// 	0,
+		// 	videoRef.current.videoWidth,
+		// 	videoRef.current.videoHeight
+		// );
 
 		drawHands(hands, ctx);
 
@@ -141,7 +139,7 @@ export default function HandPoseDetection() {
 	return (
 		<div>
 			<div
-				className="absolute cursor-left z-10 w-8 h-8 rounded-[32px] bg-white opacity-70"
+				className="absolute cursor-left z-10 w-8 h-8 rounded-[32px] bg-white opacity-70 border-2 border-white shadow-sm"
 				style={{
 					position: 'absolute',
 					top: `${fingersPosition.leftIndexTipPosY}px`,
@@ -150,7 +148,7 @@ export default function HandPoseDetection() {
 				}}
 			></div>
 			<div
-				className="absolute cursor-left z-10 w-8 h-8 rounded-[32px] bg-white opacity-70 border-2 border-white"
+				className="absolute cursor-left z-10 w-8 h-8 rounded-[32px] bg-white opacity-70 border-2 border-white shadow-sm"
 				style={{
 					top: `${fingersPosition.rightIndexTipPosY}px`,
 					right: `${fingersPosition.rightIndexTipPosX}px`,

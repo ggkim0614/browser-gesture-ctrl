@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import * as fp from 'fingerpose';
 import * as handpose from '@tensorflow-models/handpose';
+import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import {
 	createDetector,
 	SupportedModels,
@@ -33,17 +35,6 @@ async function setupVideo() {
 	return video;
 }
 
-async function setupDetector() {
-	const model = SupportedModels.MediaPipeHands;
-	const detector = await createDetector(model, {
-		runtime: 'mediapipe',
-		maxHands: 2,
-		solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
-	});
-
-	return detector;
-}
-
 async function setupCanvas(video) {
 	const canvas = document.getElementById('canvas');
 	const ctx = canvas.getContext('2d');
@@ -54,8 +45,33 @@ async function setupCanvas(video) {
 	return ctx;
 }
 
+async function setupDetector() {
+	const model = handPoseDetection.SupportedModels.MediaPipeHands;
+	const detectorConfig = {
+		runtime: 'mediapipe',
+		solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
+		modelType: 'full',
+	};
+	return handPoseDetection.createDetector(model, detectorConfig);
+}
+
+function estimateGestures(landmarks) {
+	const GE = new fp.GestureEstimator([
+		fp.Gestures.VictoryGesture,
+		fp.Gestures.ThumbsUpGesture,
+	]);
+
+	const gesture = GE.estimate(landmarks, 7.5);
+	if (gesture.gestures && gesture.gestures.length > 0) {
+		const confidence = gesture.gestures.map((prediction) => prediction.score);
+		const maxConfidence = confidence.indexOf(Math.max(...confidence));
+		return gesture.gestures[maxConfidence].name;
+	}
+	return null;
+}
+
 export default function HandPoseDetection() {
-	const [gestures, setGestures] = useState(null);
+	const [gestures, setGestures] = useState({ left: null, right: null });
 	const detectorRef = useRef();
 	const videoRef = useRef();
 	const [ctx, setCtx] = useState();
@@ -71,11 +87,34 @@ export default function HandPoseDetection() {
 		rightThumbTipPosY: 0,
 	});
 
-	const useHandPose = async () => {
-		const net = await handpose.load();
-		console.log('handpose loaded');
+	const runHandpose = async () => {
+		detector = setupDetector();
+		setInterval(() => {
+			detect(detector);
+		}, 100);
+	};
 
-		setInterval(() => {}, 100);
+	const detect = async (net) => {
+		video = setupVideo();
+		const hand = await net.estimateHands(video);
+
+		const GE = new fp.GestureEstimator([
+			fp.Gestures.VictoryGesture,
+			fp.Gestures.ThumbsUpGesture,
+		]);
+
+		const gesture = await GE.estimate(hand[0].landmarks, 8);
+		if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
+			const confidence = gesture.gestures.map((prediction) => prediction.score);
+			const maxConfidence = confidence.indexOf(
+				Math.max.apply(null, confidence)
+			);
+			setGestures(gesture.gestures[maxConfidence].name);
+		}
+
+		if (gestures !== null) {
+			console.log(gestures);
+		}
 	};
 
 	useEffect(() => {
@@ -133,7 +172,6 @@ export default function HandPoseDetection() {
 				const landmarks = hand.keypoints;
 				const indexFingerTip = landmarks[8];
 
-				// Store the actual X-coordinate (not flipped)
 				const actualX = indexFingerTip.x * translateRatioX;
 				const screenY = indexFingerTip.y * translateRatioY;
 
@@ -143,6 +181,15 @@ export default function HandPoseDetection() {
 				} else if (hand.handedness === 'Right') {
 					positions.rightIndexTipPosX = actualX;
 					positions.rightIndexTipPosY = screenY;
+				}
+
+				// Estimate gestures for each hand
+				const gesture = estimateGestures(landmarks.map((l) => [l.x, l.y, l.z]));
+				if (gesture) {
+					setGestures((prevGestures) => ({
+						...prevGestures,
+						[hand.handedness.toLowerCase()]: gesture,
+					}));
 				}
 			});
 
@@ -273,7 +320,9 @@ export default function HandPoseDetection() {
 					</div>
 					<div className="pt-4">
 						<code className="text-gray-300 text-sm">current gestures</code>
-						<code className="text-gray-100 text-sm">{}</code>
+						<code className="text-gray-100 text-sm">
+							Left: {gestures.left || 'None'}, Right: {gestures.right || 'None'}
+						</code>
 					</div>
 				</div>
 

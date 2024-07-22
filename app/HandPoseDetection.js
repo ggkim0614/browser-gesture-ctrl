@@ -95,13 +95,13 @@ export default function HandPoseDetection() {
 			videoRef.current.videoHeight
 		);
 
-		// ctx.drawImage(
-		// 	videoRef.current,
-		// 	0,
-		// 	0,
-		// 	videoRef.current.videoWidth,
-		// 	videoRef.current.videoHeight
-		// );
+		ctx.drawImage(
+			videoRef.current,
+			0,
+			0,
+			videoRef.current.videoWidth,
+			videoRef.current.videoHeight
+		);
 
 		drawHands(hands, ctx);
 
@@ -214,7 +214,7 @@ export default function HandPoseDetection() {
 				</div>
 
 				<canvas
-					className="bg-blue-50 border-2 border-blue-200"
+					className="bg-blue-50 border-1 border-blue-100"
 					style={{
 						transform: 'scaleX(-1)',
 						zIndex: 1,

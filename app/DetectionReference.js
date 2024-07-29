@@ -9,16 +9,14 @@ function DetectionReference() {
 	const webcamRef = useRef(null);
 	const canvasRef = useRef(null);
 
-	const [emoji, setEmoji] = useState(null);
-
 	const runHandpose = async () => {
 		const net = await handpose.load();
 		//console.log("handpose model loaded");
-		// loop and detect hand
 		setInterval(() => {
 			detect(net);
 		}, 100);
 	};
+
 	const detect = async (net) => {
 		if (
 			typeof webcamRef.current !== 'undefined' &&
@@ -39,10 +37,7 @@ function DetectionReference() {
 			const hand = await net.estimateHands(video);
 
 			if (hand.length > 0) {
-				const GE = new fp.GestureEstimator([
-					fp.Gestures.VictoryGesture,
-					fp.Gestures.ThumbsUpGesture,
-				]);
+				const GE = new fp.GestureEstimator([fp.Gestures.ThumbsUpGesture]);
 				const gesture = await GE.estimate(hand[0].landmarks, 8);
 				if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
 					const confidence = gesture.gestures.map(
@@ -51,7 +46,7 @@ function DetectionReference() {
 					const maxConfidence = confidence.indexOf(
 						Math.max.apply(null, confidence)
 					);
-					setEmoji(gesture.gestures[maxConfidence].name);
+					console.log(gesture.gestures[maxConfidence].name);
 				}
 			}
 

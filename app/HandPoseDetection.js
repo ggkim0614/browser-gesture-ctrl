@@ -22,23 +22,6 @@ for (let finger of [
 	thumbsUpGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
 }
 
-const victoryGesture = new fp.GestureDescription('victory');
-victoryGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl);
-victoryGesture.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl);
-victoryGesture.addDirection(
-	fp.Finger.Index,
-	fp.FingerDirection.VerticalUp,
-	1.0
-);
-victoryGesture.addDirection(
-	fp.Finger.Middle,
-	fp.FingerDirection.VerticalUp,
-	1.0
-);
-for (let finger of [fp.Finger.Ring, fp.Finger.Pinky]) {
-	victoryGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
-}
-
 const pointingGesture = new fp.GestureDescription('pointing');
 pointingGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl);
 pointingGesture.addDirection(
@@ -53,43 +36,6 @@ for (let finger of [
 	fp.Finger.Pinky,
 ]) {
 	pointingGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
-}
-
-const pinchGesture = new fp.GestureDescription('pinch');
-
-// Thumb configuration
-pinchGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 1.0);
-pinchGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.9);
-pinchGesture.addDirection(
-	fp.Finger.Thumb,
-	fp.FingerDirection.DiagonalUpRight,
-	1.0
-);
-pinchGesture.addDirection(
-	fp.Finger.Thumb,
-	fp.FingerDirection.DiagonalUpLeft,
-	1.0
-);
-
-// Index finger configuration
-pinchGesture.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);
-pinchGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 0.9);
-pinchGesture.addDirection(
-	fp.Finger.Index,
-	fp.FingerDirection.DiagonalDownRight,
-	1.0
-);
-pinchGesture.addDirection(
-	fp.Finger.Index,
-	fp.FingerDirection.DiagonalDownLeft,
-	1.0
-);
-
-// Other fingers can be either curled or extended
-for (let finger of [fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
-	pinchGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
-	pinchGesture.addCurl(finger, fp.FingerCurl.HalfCurl, 0.9);
-	pinchGesture.addCurl(finger, fp.FingerCurl.NoCurl, 0.8);
 }
 
 tfjsWasm.setWasmPaths(
@@ -137,12 +83,7 @@ async function setupDetector() {
 }
 
 function estimateGestures(landmarks) {
-	const GE = new fp.GestureEstimator([
-		thumbsUpGesture,
-		victoryGesture,
-		pointingGesture,
-		pinchGesture,
-	]);
+	const GE = new fp.GestureEstimator([thumbsUpGesture, pointingGesture]);
 
 	const gesture = GE.estimate(landmarks, 7.6); // Increased confidence threshold
 	if (gesture.gestures && gesture.gestures.length > 0) {
@@ -150,12 +91,12 @@ function estimateGestures(landmarks) {
 		const maxConfidence = Math.max(...confidence);
 		const maxConfidenceIndex = confidence.indexOf(maxConfidence);
 
-		console.log(
-			'Detected gesture:',
-			gesture.gestures[maxConfidenceIndex].name,
-			'with confidence:',
-			maxConfidence
-		);
+		// console.log(
+		// 	'Detected gesture:',
+		// 	gesture.gestures[maxConfidenceIndex].name,
+		// 	'with confidence:',
+		// 	maxConfidence
+		// );
 
 		if (maxConfidence > 9) {
 			// Increased threshold
@@ -180,6 +121,21 @@ export default function HandPoseDetection() {
 		rightThumbTipPosX: 0,
 		rightThumbTipPosY: 0,
 	});
+	const [pinchStatus, setPinchStatus] = useState({ left: false, right: false });
+
+	useEffect(() => {
+		if (pinchStatus?.left) {
+			console.log('Left hand is pinching');
+			// Add your left hand pinch logic here
+		}
+	}, [pinchStatus.left]);
+
+	useEffect(() => {
+		if (pinchStatus?.right) {
+			console.log('Right hand is pinching');
+			// Add your right hand pinch logic here
+		}
+	}, [pinchStatus.right]);
 
 	useEffect(() => {
 		async function initialize() {
@@ -192,10 +148,6 @@ export default function HandPoseDetection() {
 
 		initialize();
 	}, []);
-
-	useEffect(() => {
-		console.log('Gestures state updated:', gestures);
-	}, [gestures]);
 
 	useAnimationFrame(async (delta) => {
 		if (!detectorRef.current || !videoRef.current || !ctx) return;
@@ -210,7 +162,6 @@ export default function HandPoseDetection() {
 			videoRef.current.videoWidth,
 			videoRef.current.videoHeight
 		);
-
 		ctx.drawImage(
 			videoRef.current,
 			0,
@@ -218,6 +169,9 @@ export default function HandPoseDetection() {
 			videoRef.current.videoWidth,
 			videoRef.current.videoHeight
 		);
+
+		const newPinchStatus = drawHands(hands, ctx);
+		setPinchStatus(newPinchStatus);
 
 		drawHands(hands, ctx);
 

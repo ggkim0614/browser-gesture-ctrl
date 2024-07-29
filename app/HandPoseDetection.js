@@ -162,6 +162,8 @@ export default function HandPoseDetection() {
 			videoRef.current.videoWidth,
 			videoRef.current.videoHeight
 		);
+
+		// COMMENT THE SNIPPET BELOW TO TURN OFF THE VIDEO
 		ctx.drawImage(
 			videoRef.current,
 			0,

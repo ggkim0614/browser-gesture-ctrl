@@ -1,15 +1,96 @@
 import { useEffect, useRef, useState } from 'react';
 import * as fp from 'fingerpose';
-import * as handpose from '@tensorflow-models/handpose';
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
-import {
-	createDetector,
-	SupportedModels,
-} from '@tensorflow-models/hand-pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
 import { drawHands } from '../lib/utils';
 import { useAnimationFrame } from '../lib/hooks/useAnimationFrame';
 import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
+
+const thumbsUpGesture = new fp.GestureDescription('thumbs_up');
+thumbsUpGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl);
+thumbsUpGesture.addDirection(
+	fp.Finger.Thumb,
+	fp.FingerDirection.VerticalUp,
+	1.0
+);
+for (let finger of [
+	fp.Finger.Index,
+	fp.Finger.Middle,
+	fp.Finger.Ring,
+	fp.Finger.Pinky,
+]) {
+	thumbsUpGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
+}
+
+const victoryGesture = new fp.GestureDescription('victory');
+victoryGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl);
+victoryGesture.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl);
+victoryGesture.addDirection(
+	fp.Finger.Index,
+	fp.FingerDirection.VerticalUp,
+	1.0
+);
+victoryGesture.addDirection(
+	fp.Finger.Middle,
+	fp.FingerDirection.VerticalUp,
+	1.0
+);
+for (let finger of [fp.Finger.Ring, fp.Finger.Pinky]) {
+	victoryGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
+}
+
+const pointingGesture = new fp.GestureDescription('pointing');
+pointingGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl);
+pointingGesture.addDirection(
+	fp.Finger.Index,
+	fp.FingerDirection.VerticalUp,
+	1.0
+);
+for (let finger of [
+	fp.Finger.Thumb,
+	fp.Finger.Middle,
+	fp.Finger.Ring,
+	fp.Finger.Pinky,
+]) {
+	pointingGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
+}
+
+const pinchGesture = new fp.GestureDescription('pinch');
+
+// Thumb configuration
+pinchGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 1.0);
+pinchGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.9);
+pinchGesture.addDirection(
+	fp.Finger.Thumb,
+	fp.FingerDirection.DiagonalUpRight,
+	1.0
+);
+pinchGesture.addDirection(
+	fp.Finger.Thumb,
+	fp.FingerDirection.DiagonalUpLeft,
+	1.0
+);
+
+// Index finger configuration
+pinchGesture.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);
+pinchGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 0.9);
+pinchGesture.addDirection(
+	fp.Finger.Index,
+	fp.FingerDirection.DiagonalDownRight,
+	1.0
+);
+pinchGesture.addDirection(
+	fp.Finger.Index,
+	fp.FingerDirection.DiagonalDownLeft,
+	1.0
+);
+
+// Other fingers can be either curled or extended
+for (let finger of [fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
+	pinchGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
+	pinchGesture.addCurl(finger, fp.FingerCurl.HalfCurl, 0.9);
+	pinchGesture.addCurl(finger, fp.FingerCurl.NoCurl, 0.8);
+}
 
 tfjsWasm.setWasmPaths(
 	`https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm`
@@ -57,15 +138,29 @@ async function setupDetector() {
 
 function estimateGestures(landmarks) {
 	const GE = new fp.GestureEstimator([
-		fp.Gestures.VictoryGesture,
-		fp.Gestures.ThumbsUpGesture,
+		thumbsUpGesture,
+		victoryGesture,
+		pointingGesture,
+		pinchGesture,
 	]);
 
-	const gesture = GE.estimate(landmarks, 7.5);
+	const gesture = GE.estimate(landmarks, 7.6); // Increased confidence threshold
 	if (gesture.gestures && gesture.gestures.length > 0) {
 		const confidence = gesture.gestures.map((prediction) => prediction.score);
-		const maxConfidence = confidence.indexOf(Math.max(...confidence));
-		return gesture.gestures[maxConfidence].name;
+		const maxConfidence = Math.max(...confidence);
+		const maxConfidenceIndex = confidence.indexOf(maxConfidence);
+
+		console.log(
+			'Detected gesture:',
+			gesture.gestures[maxConfidenceIndex].name,
+			'with confidence:',
+			maxConfidence
+		);
+
+		if (maxConfidence > 9) {
+			// Increased threshold
+			return gesture.gestures[maxConfidenceIndex].name;
+		}
 	}
 	return null;
 }
@@ -75,7 +170,6 @@ export default function HandPoseDetection() {
 	const detectorRef = useRef();
 	const videoRef = useRef();
 	const [ctx, setCtx] = useState();
-	const [isCameraOn, setIsCameraOn] = useState(true);
 	const [fingersPosition, setFingersPosition] = useState({
 		leftIndexTipPosX: 0,
 		leftIndexTipPosY: 0,
@@ -86,36 +180,6 @@ export default function HandPoseDetection() {
 		rightThumbTipPosX: 0,
 		rightThumbTipPosY: 0,
 	});
-
-	const runHandpose = async () => {
-		detector = setupDetector();
-		setInterval(() => {
-			detect(detector);
-		}, 100);
-	};
-
-	const detect = async (net) => {
-		video = setupVideo();
-		const hand = await net.estimateHands(video);
-
-		const GE = new fp.GestureEstimator([
-			fp.Gestures.VictoryGesture,
-			fp.Gestures.ThumbsUpGesture,
-		]);
-
-		const gesture = await GE.estimate(hand[0].landmarks, 8);
-		if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
-			const confidence = gesture.gestures.map((prediction) => prediction.score);
-			const maxConfidence = confidence.indexOf(
-				Math.max.apply(null, confidence)
-			);
-			setGestures(gesture.gestures[maxConfidence].name);
-		}
-
-		if (gestures !== null) {
-			console.log(gestures);
-		}
-	};
 
 	useEffect(() => {
 		async function initialize() {
@@ -128,6 +192,10 @@ export default function HandPoseDetection() {
 
 		initialize();
 	}, []);
+
+	useEffect(() => {
+		console.log('Gestures state updated:', gestures);
+	}, [gestures]);
 
 	useAnimationFrame(async (delta) => {
 		if (!detectorRef.current || !videoRef.current || !ctx) return;
@@ -152,6 +220,9 @@ export default function HandPoseDetection() {
 		);
 
 		drawHands(hands, ctx);
+
+		// Initialize an object to track detected hands
+		const detectedHands = { left: false, right: false };
 
 		if (hands.length > 0) {
 			const positions = {
@@ -183,18 +254,27 @@ export default function HandPoseDetection() {
 					positions.rightIndexTipPosY = screenY;
 				}
 
+				// Mark this hand as detected
+				detectedHands[hand.handedness.toLowerCase()] = true;
+
 				// Estimate gestures for each hand
-				const gesture = estimateGestures(landmarks.map((l) => [l.x, l.y, l.z]));
-				if (gesture) {
-					setGestures((prevGestures) => ({
-						...prevGestures,
-						[hand.handedness.toLowerCase()]: gesture,
-					}));
-				}
+				const gestureInput = landmarks.map((l) => [l.x, l.y, l.z]);
+				const gesture = estimateGestures(gestureInput);
+
+				setGestures((prevGestures) => ({
+					...prevGestures,
+					[hand.handedness.toLowerCase()]: gesture,
+				}));
 			});
 
 			setFingersPosition(positions);
 		}
+
+		// Clear gestures for hands that are no longer detected
+		setGestures((prevGestures) => ({
+			left: detectedHands.left ? prevGestures.left : null,
+			right: detectedHands.right ? prevGestures.right : null,
+		}));
 	}, !!(detectorRef.current && videoRef.current && ctx));
 
 	return (
@@ -317,12 +397,6 @@ export default function HandPoseDetection() {
 								{fingersPosition?.rightIndexTipPosY}
 							</code>
 						</section>
-					</div>
-					<div className="pt-4">
-						<code className="text-gray-300 text-sm">current gestures</code>
-						<code className="text-gray-100 text-sm">
-							Left: {gestures.left || 'None'}, Right: {gestures.right || 'None'}
-						</code>
 					</div>
 				</div>
 

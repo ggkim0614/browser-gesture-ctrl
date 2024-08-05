@@ -35,8 +35,13 @@ export default function HandPoseDetection() {
 		left: { isPinching: false, wasPinching: false },
 		right: { isPinching: false, wasPinching: false },
 	});
+	const [selectedVideoId, setSelectedVideoId] = useState(null);
 
 	const [isClient, setIsClient] = useState(false);
+
+	const handleVideoSelect = (videoId) => {
+		setSelectedVideoId(videoId);
+	};
 
 	useEffect(() => {
 		setIsClient(true);
@@ -74,36 +79,38 @@ export default function HandPoseDetection() {
 	const detectedHands = useMemo(() => ({ left: false, right: false }), []);
 
 	useEffect(() => {
-		const handleMouseEvent = (hand, state) => {
-			const event = new MouseEvent(state === 'down' ? 'mousedown' : 'mouseup', {
-				bubbles: true,
-				cancelable: true,
-				view: window,
-			});
+		const handlePinch = (hand) => {
 			const element = document.elementFromPoint(
 				fingersPosition[`${hand}IndexTipPosX`],
 				fingersPosition[`${hand}IndexTipPosY`]
 			);
 			if (element) {
-				element.dispatchEvent(event);
+				// Find the closest ancestor with the 'youtube-playlist-item' class
+				const playlistItem = element.closest('.youtube-playlist-item');
+				if (playlistItem) {
+					const videoId = playlistItem.getAttribute('data-video-id');
+					if (videoId) {
+						console.log(`Pinch detected on video ${videoId}`);
+						handleVideoSelect(videoId);
+					}
+				}
 			}
 		};
 
 		['left', 'right'].forEach((hand) => {
 			if (pinchStatus[hand].isPinching && !pinchStatus[hand].wasPinching) {
 				setMouseState((prev) => ({ ...prev, [hand]: 'down' }));
-				handleMouseEvent(hand, 'down');
+				handlePinch(hand);
 				console.log(`${hand} hand started pinching`);
 			} else if (
 				!pinchStatus[hand].isPinching &&
 				pinchStatus[hand].wasPinching
 			) {
 				setMouseState((prev) => ({ ...prev, [hand]: 'up' }));
-				handleMouseEvent(hand, 'up');
 				console.log(`${hand} hand stopped pinching`);
 			}
 		});
-	}, [pinchStatus, fingersPosition]);
+	}, [pinchStatus, fingersPosition, handleVideoSelect]);
 
 	useEffect(() => {
 		const handleZoom = () => {
@@ -225,7 +232,11 @@ export default function HandPoseDetection() {
 
 	return (
 		<div>
-			<Content zoomLevel={zoomLevel} />
+			<Content
+				zoomLevel={zoomLevel}
+				onVideoSelect={handleVideoSelect}
+				selectedVideoId={selectedVideoId}
+			/>
 			{isClient && (
 				<>
 					{['left', 'right'].map((hand) => (
@@ -299,6 +310,7 @@ export default function HandPoseDetection() {
 						position: 'absolute',
 						top: 0,
 						left: 0,
+						pointerEvents: 'none',
 					}}
 					id="canvas"
 				/>

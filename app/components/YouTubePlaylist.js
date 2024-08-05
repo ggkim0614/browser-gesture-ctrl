@@ -31,12 +31,20 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 	return (
 		<div
 			className="youtube-playlist"
-			style={{ display: 'flex', overflowX: 'auto', padding: '10px' }}
+			style={{
+				display: 'flex',
+				overflowX: 'auto',
+				padding: '10px',
+				position: 'relative',
+				zIndex: 2, // Make sure this is higher than the canvas z-index
+			}}
 		>
 			{playlistItems.map((item) => (
 				<div
 					key={item.id}
 					onClick={() => onVideoSelect(item.snippet.resourceId.videoId)}
+					className="youtube-playlist-item"
+					data-video-id={item.snippet.resourceId.videoId}
 					style={{
 						cursor: 'pointer',
 						margin: '0 10px',

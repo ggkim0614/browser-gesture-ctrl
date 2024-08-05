@@ -5,9 +5,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import YouTubePlaylist from './components/YouTubePlaylist';
 import YouTubePlayerModal from './components/YoutubePlayerModal';
 
-const ZoomableContent = ({ zoomLevel }) => {
-	const [selectedVideoId, setSelectedVideoId] = useState(null);
-
+const ZoomableContent = ({ zoomLevel, onVideoSelect, selectedVideoId }) => {
 	const handleVideoSelect = (videoId) => {
 		setSelectedVideoId(videoId);
 	};
@@ -30,11 +28,11 @@ const ZoomableContent = ({ zoomLevel }) => {
 			}}
 		>
 			<h2>YouTube Playlist</h2>
-			<YouTubePlaylist onVideoSelect={handleVideoSelect} />
+			<YouTubePlaylist onVideoSelect={onVideoSelect} />
 			{selectedVideoId && (
 				<YouTubePlayerModal
 					videoId={selectedVideoId}
-					onClose={handleCloseModal}
+					onClose={() => onVideoSelect(null)}
 				/>
 			)}
 			<div className="font-mono text-gray-500 text-[24px]">OTHER CONTENT</div>

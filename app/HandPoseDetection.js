@@ -8,6 +8,7 @@ import { useHandTracking } from '@/lib/hooks/useHandTracking';
 import { useAnimationFrame } from '../lib/hooks/useAnimationFrame';
 import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
 import Content from './Content';
+import FloatingToolbar from './components/Toolbar';
 
 tfjsWasm.setWasmPaths(
 	`https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm`
@@ -43,6 +44,11 @@ export default function HandPoseDetection() {
 
 	const handleVideoSelect = (videoId) => {
 		setSelectedVideoId(videoId);
+	};
+
+	const handleResetZoom = () => {
+		setZoomLevel(100);
+		setZoomOrigin({ x: 0, y: 0 });
 	};
 
 	useEffect(() => {
@@ -154,6 +160,12 @@ export default function HandPoseDetection() {
 						if (!element.closest('.youtube-player-content')) {
 							handleVideoSelect(null);
 						}
+					} else if (
+						element &&
+						element.classList.contains('reset-zoom-button')
+					) {
+						// If the clicked element is the reset zoom button, call handleResetZoom
+						handleResetZoom();
 					}
 				}
 				setScrollStartY((prev) => ({ ...prev, [hand]: null }));
@@ -256,6 +268,15 @@ export default function HandPoseDetection() {
 							{/* SVG content */}
 						</div>
 					))}
+					<FloatingToolbar
+						zoomLevel={zoomLevel}
+						onResetZoom={handleResetZoom}
+						style={{
+							bottom: '20px',
+							left: '50%',
+							transform: 'translateX(-50%)',
+						}}
+					/>
 				</>
 			)}
 			<main>

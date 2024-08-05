@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
 import { drawHands } from '../lib/utils';
@@ -31,48 +31,12 @@ export default function HandPoseDetection() {
 		left: { isPinching: false, wasPinching: false },
 		right: { isPinching: false, wasPinching: false },
 	});
-	const [hoveredElement, setHoveredElement] = useState(null);
-	const [clickedElement, setClickedElement] = useState(null);
+
 	const [isClient, setIsClient] = useState(false);
-
-	const handleHover = useCallback((x, y, hand) => {
-		const element = document.elementFromPoint(x, y);
-		if (element && element.dataset.interactive) {
-			setHoveredElement(element);
-		} else {
-			setHoveredElement(null);
-		}
-	}, []);
-
-	const handleClick = useCallback((x, y, hand) => {
-		const element = document.elementFromPoint(x, y);
-		if (element && element.dataset.interactive) {
-			setClickedElement(element);
-			element.click();
-		}
-	}, []);
 
 	useEffect(() => {
 		setIsClient(true);
 	}, []);
-
-	useEffect(() => {
-		if (hands.left) {
-			handleHover(hands.left.indexTip.x, hands.left.indexTip.y, 'left');
-		}
-		if (hands.right) {
-			handleHover(hands.right.indexTip.x, hands.right.indexTip.y, 'right');
-		}
-	}, [hands, handleHover]);
-
-	useEffect(() => {
-		if (pinchState.left) {
-			handleClick(hands.left.indexTip.x, hands.left.indexTip.y, 'left');
-		}
-		if (pinchState.right) {
-			handleClick(hands.right.indexTip.x, hands.right.indexTip.y, 'right');
-		}
-	}, [pinchState, hands, handleClick]);
 
 	useEffect(() => {
 		if (pinchStatus.left.isPinching && !pinchStatus.left.wasPinching) {
@@ -262,30 +226,6 @@ export default function HandPoseDetection() {
 			)}
 			<main>
 				<div>
-					{isClient && hands.left && (
-						<Cursor
-							x={hands.left.indexTip.x}
-							y={hands.left.indexTip.y}
-							hand="left"
-							isPinching={pinchState.left}
-						/>
-					)}
-					{isClient && hands.right && (
-						<Cursor
-							x={hands.right.indexTip.x}
-							y={hands.right.indexTip.y}
-							hand="right"
-							isPinching={pinchState.right}
-						/>
-					)}
-					<InteractiveElement
-						isHovered={
-							hoveredElement && hoveredElement.id === 'interactive-element'
-						}
-						isClicked={
-							clickedElement && clickedElement.id === 'interactive-element'
-						}
-					/>
 					<canvas
 						className="bg-blue-50 border-1 border-blue-100"
 						style={{
@@ -311,45 +251,6 @@ export default function HandPoseDetection() {
 					/>
 				</div>
 			</main>
-		</div>
-	);
-}
-
-function Cursor({ x, y, hand, isPinching }) {
-	return (
-		<div
-			style={{
-				position: 'absolute',
-				left: x,
-				top: y,
-				width: isPinching ? 20 : 10,
-				height: isPinching ? 20 : 10,
-				borderRadius: '50%',
-				backgroundColor: hand === 'left' ? 'red' : 'blue',
-				transform: 'translate(-50%, -50%)',
-				pointerEvents: 'none',
-				transition: 'all 0.1s ease-out',
-			}}
-		/>
-	);
-}
-
-function InteractiveElement({ isHovered, isClicked }) {
-	return (
-		<div
-			id="interactive-element"
-			style={{
-				position: 'absolute',
-				left: '50%',
-				top: '50%',
-				transform: 'translate(-50%, -50%)',
-				padding: 20,
-				backgroundColor: isClicked ? 'green' : isHovered ? 'yellow' : 'gray',
-				transition: 'background-color 0.3s ease',
-			}}
-			data-interactive="true"
-		>
-			Interactive Element
 		</div>
 	);
 }

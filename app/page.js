@@ -7,9 +7,9 @@ import HandPoseDetection from './HandPoseDetection';
 export default function Home() {
 	return (
 		<div>
-			<JustTheHand />
+			{/* <JustTheHand /> */}
 			{/* <PinchWithCursor /> */}
-			{/* <HandPoseDetection /> */}
+			<HandPoseDetection />
 		</div>
 	);
 }

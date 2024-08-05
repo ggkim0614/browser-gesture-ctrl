@@ -289,34 +289,32 @@ export default function HandPoseDetection() {
 				</>
 			)}
 			<main>
-				<div>
-					<canvas
-						className="border-1 border-blue-100"
-						style={{
-							transform: 'scaleX(-1)',
-							zIndex: 1,
-							width: '100vw',
-							height: '100vh',
-							position: 'absolute',
-							top: 0,
-							left: 0,
-						}}
-						id="canvas"
-					/>
-					<video
-						style={{
-							visibility: 'hidden',
-							transform: 'scaleX(-1)',
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							width: 0,
-							height: 0,
-						}}
-						id="video"
-						playsInline
-					/>
-				</div>
+				<canvas
+					className="border-1 border-blue-100"
+					style={{
+						transform: 'scaleX(-1)',
+						zIndex: 1,
+						width: '100vw',
+						height: '100vh',
+						position: 'absolute',
+						top: 0,
+						left: 0,
+					}}
+					id="canvas"
+				/>
+				<video
+					style={{
+						visibility: 'hidden',
+						transform: 'scaleX(-1)',
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						width: 0,
+						height: 0,
+					}}
+					id="video"
+					playsInline
+				/>
 			</main>
 		</div>
 	);

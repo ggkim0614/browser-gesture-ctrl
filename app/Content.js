@@ -5,7 +5,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import YouTubePlaylist from './components/YouTubePlaylist';
 import YouTubePlayerModal from './components/YoutubePlayerModal';
 
-const ZoomableContent = ({ zoomLevel, initialPlaylistItems }) => {
+const ZoomableContent = ({ zoomLevel }) => {
 	const [selectedVideoId, setSelectedVideoId] = useState(null);
 
 	const handleVideoSelect = (videoId) => {
@@ -15,22 +15,6 @@ const ZoomableContent = ({ zoomLevel, initialPlaylistItems }) => {
 	const handleCloseModal = () => {
 		setSelectedVideoId(null);
 	};
-
-	useEffect(() => {
-		const fetchPlaylistItems = async () => {
-			try {
-				const response = await fetch('/api/youtube-playlist');
-				const data = await response.json();
-				setPlaylistItems(data);
-			} catch (error) {
-				console.error('Error fetching playlist items:', error);
-			}
-		};
-
-		if (!initialPlaylistItems) {
-			fetchPlaylistItems();
-		}
-	}, [initialPlaylistItems]);
 
 	return (
 		<div

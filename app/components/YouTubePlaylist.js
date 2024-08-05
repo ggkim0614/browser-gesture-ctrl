@@ -2,9 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const YOUTUBE_API_KEY = 'YOUR_API_KEY';
-const PLAYLIST_ID = 'YOUR_PLAYLIST_ID';
-
 const YouTubePlaylist = ({ onVideoSelect }) => {
 	const [playlistItems, setPlaylistItems] = useState([]);
 
@@ -17,8 +14,8 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 						params: {
 							part: 'snippet',
 							maxResults: 50,
-							playlistId: PLAYLIST_ID,
-							key: YOUTUBE_API_KEY,
+							playlistId: process.env.NEXT_PUBLIC_YOUTUBE_PLAYLIST_ID,
+							key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
 						},
 					}
 				);

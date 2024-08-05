@@ -13,7 +13,7 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 					{
 						params: {
 							part: 'snippet',
-							maxResults: 50,
+							maxResults: 20,
 							playlistId: process.env.NEXT_PUBLIC_YOUTUBE_PLAYLIST_ID,
 							key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
 						},
@@ -30,20 +30,21 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 
 	return (
 		<div
-			className="youtube-playlist"
+			className="youtube-playlist clickable"
 			style={{
 				display: 'flex',
-				overflowX: 'auto',
+				flexDirection: 'column', // Change to vertical layout
+				overflowY: 'auto', // Enable vertical scrolling
+				height: '100vh', // Set a fixed height or adjust as needed
 				padding: '10px',
-				position: 'relative',
-				zIndex: 2, // Make sure this is higher than the canvas z-index
 			}}
+			id="youtube-playlist" // Add an id for easy reference
 		>
 			{playlistItems.map((item) => (
 				<div
 					key={item.id}
 					onClick={() => onVideoSelect(item.snippet.resourceId.videoId)}
-					className="youtube-playlist-item"
+					className="youtube-playlist-item clickable bg-white hover:bg-blue-100"
 					data-video-id={item.snippet.resourceId.videoId}
 					style={{
 						cursor: 'pointer',
@@ -56,8 +57,11 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 						src={item.snippet.thumbnails.medium.url}
 						alt={item.snippet.title}
 						style={{ width: '100%', height: 'auto' }}
+						className="clickable"
 					/>
-					<p>{item.snippet.title}</p>
+					<div className="clickable text-[14px] font-mono">
+						{item.snippet.title}
+					</div>
 				</div>
 			))}
 		</div>

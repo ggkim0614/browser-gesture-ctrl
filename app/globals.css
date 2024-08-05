@@ -6,4 +6,10 @@
   .text-balance {
     text-wrap: balance;
   }
+  .clickable {
+    position: relative;
+    z-index: 2;
+  }
 }
+
+

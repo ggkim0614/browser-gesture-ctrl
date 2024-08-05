@@ -21,6 +21,7 @@ export default function HandPoseDetection() {
 	const detectorRef = useRef();
 	const videoRef = useRef();
 	const [ctx, setCtx] = useState();
+	const [pinchStartY, setPinchStartY] = useState({ left: null, right: null });
 	const [fingersPosition, setFingersPosition] = useState({
 		leftIndexTipPosX: 0,
 		leftIndexTipPosY: 0,
@@ -79,28 +80,76 @@ export default function HandPoseDetection() {
 	const detectedHands = useMemo(() => ({ left: false, right: false }), []);
 
 	useEffect(() => {
-		const handlePinch = (hand) => {
-			const element = document.elementFromPoint(
-				fingersPosition[`${hand}IndexTipPosX`],
-				fingersPosition[`${hand}IndexTipPosY`]
-			);
+		let lastHoveredElement = null;
+
+		const simulateEvent = (eventType, x, y) => {
+			const element = document.elementFromPoint(x, y);
 			if (element) {
-				// Find the closest ancestor with the 'youtube-playlist-item' class
-				const playlistItem = element.closest('.youtube-playlist-item');
-				if (playlistItem) {
-					const videoId = playlistItem.getAttribute('data-video-id');
-					if (videoId) {
-						console.log(`Pinch detected on video ${videoId}`);
-						handleVideoSelect(videoId);
-					}
+				const event = new MouseEvent(eventType, {
+					view: window,
+					bubbles: true,
+					cancelable: true,
+					clientX: x,
+					clientY: y,
+				});
+				element.dispatchEvent(event);
+				return element;
+			}
+			return null;
+		};
+
+		const handleHover = (hand) => {
+			const x = fingersPosition[`${hand}IndexTipPosX`];
+			const y = fingersPosition[`${hand}IndexTipPosY`];
+
+			const hoveredElement = simulateEvent('mousemove', x, y);
+
+			if (hoveredElement !== lastHoveredElement) {
+				if (lastHoveredElement) {
+					simulateEvent('mouseleave', x, y);
 				}
+				if (hoveredElement) {
+					simulateEvent('mouseenter', x, y);
+				}
+				lastHoveredElement = hoveredElement;
+			}
+		};
+
+		const handlePinch = (hand) => {
+			const x = fingersPosition[`${hand}IndexTipPosX`];
+			const y = fingersPosition[`${hand}IndexTipPosY`];
+
+			const playlistElement = document.getElementById('youtube-playlist');
+
+			if (pinchStatus[hand].isPinching && !pinchStatus[hand].wasPinching) {
+				// Pinch start
+				setPinchStartY((prev) => ({ ...prev, [hand]: y }));
+			} else if (
+				pinchStatus[hand].isPinching &&
+				pinchStatus[hand].wasPinching
+			) {
+				// Pinch and drag
+				if (pinchStartY[hand] !== null && playlistElement) {
+					const deltaY = y - pinchStartY[hand];
+					playlistElement.scrollBy(0, -deltaY * 1.5); // Adjust the multiplier for sensitivity
+					setPinchStartY((prev) => ({ ...prev, [hand]: y }));
+				}
+			} else if (
+				!pinchStatus[hand].isPinching &&
+				pinchStatus[hand].wasPinching
+			) {
+				// Pinch end
+				setPinchStartY((prev) => ({ ...prev, [hand]: null }));
+				simulateEvent('click', x, y);
 			}
 		};
 
 		['left', 'right'].forEach((hand) => {
+			handleHover(hand);
+			handlePinch(hand);
+
 			if (pinchStatus[hand].isPinching && !pinchStatus[hand].wasPinching) {
 				setMouseState((prev) => ({ ...prev, [hand]: 'down' }));
-				handlePinch(hand);
 				console.log(`${hand} hand started pinching`);
 			} else if (
 				!pinchStatus[hand].isPinching &&
@@ -110,7 +159,7 @@ export default function HandPoseDetection() {
 				console.log(`${hand} hand stopped pinching`);
 			}
 		});
-	}, [pinchStatus, fingersPosition, handleVideoSelect]);
+	}, [pinchStatus, fingersPosition, pinchStartY]);
 
 	useEffect(() => {
 		const handleZoom = () => {

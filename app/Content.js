@@ -1,30 +1,17 @@
 'use client';
 
-// components/ZoomableContent.js
 import React, { useState, useEffect, Suspense } from 'react';
 import YouTubePlaylist from './components/YouTubePlaylist';
 import YouTubePlayerModal from './components/YoutubePlayerModal';
 
-const ZoomableContent = ({ zoomLevel, onVideoSelect, selectedVideoId }) => {
-	const handleVideoSelect = (videoId) => {
-		setSelectedVideoId(videoId);
-	};
-
-	const handleCloseModal = () => {
-		setSelectedVideoId(null);
-	};
-
+const Content = ({ zoomLevel, onVideoSelect, selectedVideoId }) => {
 	return (
 		<div
 			style={{
-				position: 'absolute',
-				top: 0,
-				left: 0,
-				width: '100%',
-				height: '100%',
 				transform: `scale(${zoomLevel / 100})`,
 				transformOrigin: 'top left',
-				overflow: 'auto',
+				height: '100vh', // Full viewport height
+				overflow: 'hidden', // Hide overflow for zoom effect
 			}}
 		>
 			<h2>YouTube Playlist</h2>
@@ -40,4 +27,4 @@ const ZoomableContent = ({ zoomLevel, onVideoSelect, selectedVideoId }) => {
 	);
 };
 
-export default ZoomableContent;
+export default Content;

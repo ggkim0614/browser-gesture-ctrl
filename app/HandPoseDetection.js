@@ -7,6 +7,7 @@ import { drawHands } from '../lib/utils';
 import { useHandTracking } from '@/lib/hooks/useHandTracking';
 import { useAnimationFrame } from '../lib/hooks/useAnimationFrame';
 import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
+import Content from './Content';
 
 tfjsWasm.setWasmPaths(
 	`https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm`
@@ -113,13 +114,13 @@ export default function HandPoseDetection() {
 				);
 
 				if (prevDistance !== null) {
-					const zoomThreshold = 10; // Adjust as needed
+					const zoomThreshold = 10;
 					if (Math.abs(currentDistance - prevDistance) > zoomThreshold) {
 						const newZoomLevel =
 							zoomLevel + (currentDistance > prevDistance ? 5 : -5);
 						const clampedZoomLevel = Math.max(50, Math.min(300, newZoomLevel));
 						setZoomLevel(clampedZoomLevel);
-						document.body.style.zoom = `${clampedZoomLevel}%`;
+						// Remove this line: document.body.style.zoom = `${clampedZoomLevel}%`;
 					}
 				}
 
@@ -218,6 +219,7 @@ export default function HandPoseDetection() {
 
 	return (
 		<div>
+			<Content zoomLevel={zoomLevel} />
 			{isClient && (
 				<>
 					{['left', 'right'].map((hand) => (
@@ -283,12 +285,15 @@ export default function HandPoseDetection() {
 			<main>
 				<div>
 					<canvas
-						className="bg-blue-50 border-1 border-blue-100"
+						className="border-1 border-blue-100"
 						style={{
 							transform: 'scaleX(-1)',
 							zIndex: 1,
 							width: '100vw',
 							height: '100vh',
+							position: 'absolute',
+							top: 0,
+							left: 0,
 						}}
 						id="canvas"
 					/>

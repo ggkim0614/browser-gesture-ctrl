@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npx next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -16,10 +16,12 @@
     "@tensorflow/tfjs-backend-wasm": "^4.20.0",
     "@tensorflow/tfjs-backend-webgl": "^4.20.0",
     "@tensorflow/tfjs-core": "^4.20.0",
+    "axios": "^1.7.3",
     "fingerpose": "^0.1.0",
     "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-youtube": "^10.1.0"
   },
   "devDependencies": {
     "eslint": "^8",

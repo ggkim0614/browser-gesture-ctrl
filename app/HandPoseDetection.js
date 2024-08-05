@@ -114,14 +114,20 @@ export default function HandPoseDetection() {
 				);
 
 				if (prevDistance !== null) {
-					const zoomThreshold = 10;
-					if (Math.abs(currentDistance - prevDistance) > zoomThreshold) {
-						const newZoomLevel =
-							zoomLevel + (currentDistance > prevDistance ? 5 : -5);
-						const clampedZoomLevel = Math.max(50, Math.min(300, newZoomLevel));
-						setZoomLevel(clampedZoomLevel);
-						// Remove this line: document.body.style.zoom = `${clampedZoomLevel}%`;
-					}
+					// Calculate the ratio of change in distance
+					const distanceRatio = currentDistance / prevDistance;
+
+					// Apply a dampening factor to make the zoom less sensitive
+					const dampeningFactor = 0.5;
+					const zoomFactor = 1 + (distanceRatio - 1) * dampeningFactor;
+
+					// Calculate new zoom level
+					const newZoomLevel = zoomLevel * zoomFactor;
+
+					// Clamp the zoom level between 50% and 300%
+					const clampedZoomLevel = Math.max(50, Math.min(300, newZoomLevel));
+
+					setZoomLevel(clampedZoomLevel);
 				}
 
 				setPrevDistance(currentDistance);

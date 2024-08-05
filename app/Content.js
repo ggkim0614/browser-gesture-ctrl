@@ -1,9 +1,37 @@
-// components/ZoomableContent.js
-import React from 'react';
-import SpotifyPlaylist from './SpotifyPlaylist';
-import YouTubePlaylist from './YouTubePlaylist';
+'use client';
 
-const ZoomableContent = ({ zoomLevel }) => {
+// components/ZoomableContent.js
+import React, { useState, useEffect, Suspense } from 'react';
+import YouTubePlaylist from './components/YouTubePlaylist';
+import YouTubePlayerModal from './components/YoutubePlayerModal';
+
+const ZoomableContent = ({ zoomLevel, initialPlaylistItems }) => {
+	const [selectedVideoId, setSelectedVideoId] = useState(null);
+
+	const handleVideoSelect = (videoId) => {
+		setSelectedVideoId(videoId);
+	};
+
+	const handleCloseModal = () => {
+		setSelectedVideoId(null);
+	};
+
+	useEffect(() => {
+		const fetchPlaylistItems = async () => {
+			try {
+				const response = await fetch('/api/youtube-playlist');
+				const data = await response.json();
+				setPlaylistItems(data);
+			} catch (error) {
+				console.error('Error fetching playlist items:', error);
+			}
+		};
+
+		if (!initialPlaylistItems) {
+			fetchPlaylistItems();
+		}
+	}, [initialPlaylistItems]);
+
 	return (
 		<div
 			style={{
@@ -17,9 +45,15 @@ const ZoomableContent = ({ zoomLevel }) => {
 				overflow: 'auto',
 			}}
 		>
-			<SpotifyPlaylist />
-			<YouTubePlaylist />
-			<div className="text-[24px] text-yellow-600">This is Content</div>
+			<h2>YouTube Playlist</h2>
+			<YouTubePlaylist onVideoSelect={handleVideoSelect} />
+			{selectedVideoId && (
+				<YouTubePlayerModal
+					videoId={selectedVideoId}
+					onClose={handleCloseModal}
+				/>
+			)}
+			<div className="font-mono text-gray-500 text-[24px]">OTHER CONTENT</div>
 		</div>
 	);
 };

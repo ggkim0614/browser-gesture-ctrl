@@ -5,8 +5,8 @@ import {
 	SupportedModels,
 } from '@tensorflow-models/hand-pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
-import { drawHands } from '../lib/legacy/legacyUtils';
-import { useAnimationFrame } from '../lib/hooks/useAnimationFrame';
+import { drawHands } from '../../lib/legacy/legacyUtils';
+import { useAnimationFrame } from '../../lib/hooks/useAnimationFrame';
 import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
 
 tfjsWasm.setWasmPaths(

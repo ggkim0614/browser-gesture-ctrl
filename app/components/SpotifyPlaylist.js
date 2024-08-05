@@ -11,7 +11,10 @@ const SpotifyPlaylist = () => {
 
 	return (
 		<div>
-			<h2>Spotify Playlists</h2>
+			<div className="text-[36px] font-semibold text-lime-600">
+				Spotify Playlists
+			</div>
+			<button className="border b-1-black">click me</button>
 			{/* Render playlists */}
 		</div>
 	);

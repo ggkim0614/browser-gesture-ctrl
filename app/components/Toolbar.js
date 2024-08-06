@@ -1,4 +1,3 @@
-// components/FloatingToolbar.js
 import React from 'react';
 
 const FloatingToolbar = ({ zoomLevel, onResetZoom, style }) => {

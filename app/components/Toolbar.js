@@ -5,9 +5,9 @@ const FloatingToolbar = ({ zoomLevel, onResetZoom, style }) => {
 		<div
 			style={{
 				position: 'fixed',
-				backgroundColor: 'rgba(0, 0, 0, 0.5)',
+				backgroundColor: 'rgba(0, 0, 0, 0.7)',
 				color: 'white',
-				padding: '6px',
+				padding: '4px',
 				borderRadius: '20px',
 				display: 'flex',
 				alignItems: 'center',
@@ -15,9 +15,10 @@ const FloatingToolbar = ({ zoomLevel, onResetZoom, style }) => {
 				zIndex: 1000,
 				...style,
 			}}
+			className="backdrop-blur-sm"
 		>
 			<div className="font-mono font-normal text-[16px] pl-4">
-				Current Zoom Level:{' '}
+				Current Zoom Level:&nbsp;
 				<span className="font-bold">{zoomLevel.toFixed(0)}%</span>
 			</div>
 			<button

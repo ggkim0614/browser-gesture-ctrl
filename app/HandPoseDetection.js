@@ -313,7 +313,6 @@ export default function HandPoseDetection() {
 						zoomLevel={zoomLevel}
 						onResetZoom={handleResetZoom}
 						style={{
-							bottom: '20px',
 							left: '50%',
 							transform: 'translateX(-50%)',
 						}}

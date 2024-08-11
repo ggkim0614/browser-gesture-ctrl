@@ -4,39 +4,21 @@ const FloatingToolbar = ({ zoomLevel, onResetZoom, style }) => {
 	return (
 		<div
 			style={{
-				position: 'fixed',
-				backgroundColor: 'rgba(0, 0, 0, 0.7)',
-				color: 'white',
-				padding: '4px',
-				borderRadius: '20px',
-				display: 'flex',
-				alignItems: 'center',
-				gap: '20px',
-				zIndex: 1000,
 				...style,
 			}}
-			className="backdrop-blur-sm"
+			className="bg-black bg-opacity-65 text-white w-full items-center p-6 flex justify-between backdrop-blur-sm fixed bottom-0 z-100"
 		>
-			<div className="font-mono font-normal text-[16px] pl-4">
-				Current Zoom Level:&nbsp;
-				<span className="font-bold">{zoomLevel.toFixed(0)}%</span>
+			<div className="font-jbm">
+				<div>Distant Browser Control</div>
+				<div className="opacity-65">v1.0</div>
+				<div className="font-jbm font-normal text-[20px]">
+					Current Zoom Level:&nbsp;
+					<span className="font-bold">{zoomLevel.toFixed(0)}%</span>
+				</div>
 			</div>
 			<button
 				onClick={onResetZoom}
-				className="reset-zoom-button font-mono"
-				style={{
-					backgroundColor: '#4CAF50',
-					border: 'none',
-					color: 'white',
-					padding: '8px 16px',
-					textAlign: 'center',
-					textDecoration: 'none',
-					display: 'inline-block',
-					fontSize: '16px',
-					margin: '4px 2px',
-					cursor: 'pointer',
-					borderRadius: '12px',
-				}}
+				className="text-3xl text-center reset-zoom-button font-jbm rounded-full cursor-pointer bg-[#167DFF] border-none px-16 py-9"
 			>
 				Reset Zoom
 			</button>

@@ -45,7 +45,7 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 
 	return (
 		<div
-			className="youtube-playlist clickable"
+			className="youtube-playlist clickable font-jbm"
 			style={{
 				display: 'grid',
 				gridTemplateColumns: 'repeat(3, 1fr)',
@@ -61,17 +61,14 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 				<div
 					key={item.id}
 					onClick={() => handleItemSelect(item.snippet.resourceId.videoId)}
-					className={`youtube-playlist-item clickable bg-white hover:bg-blue-100 ${
+					className={`cursor-pointer rounded-md border border-1 border-gray-200 shadow-md youtube-playlist-item clickable bg-white hover:bg-blue-100 ${
 						selectedItem === item.snippet.resourceId.videoId
 							? 'border-4 border-blue-500'
 							: ''
 					}`}
 					data-video-id={item.snippet.resourceId.videoId}
 					style={{
-						cursor: 'pointer',
-						borderRadius: '10px',
 						overflow: 'hidden',
-						boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 						display: 'flex',
 						flexDirection: 'column',
 						transition: 'all 0.3s ease',
@@ -83,16 +80,7 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 						style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
 						className="clickable"
 					/>
-					<div
-						className="clickable text-[24px] font-mono p-4"
-						style={{
-							flexGrow: 1,
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							textAlign: 'center',
-						}}
-					>
+					<div className="clickable text-2xl font-semibold p-4 justify-center items-center flex flex-grow">
 						{item.snippet.title}
 					</div>
 				</div>

@@ -14,7 +14,7 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 					{
 						params: {
 							part: 'snippet',
-							maxResults: 20,
+							maxResults: 30,
 							playlistId: process.env.NEXT_PUBLIC_YOUTUBE_PLAYLIST_ID,
 							key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
 						},
@@ -40,19 +40,15 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 				}
 				setSelectedItem(null);
 			}, 1000)
-		); // 1 second delay
+		);
 	};
 
 	return (
 		<div
-			className="youtube-playlist clickable font-jbm"
+			className="youtube-playlist clickable font-jbm grid gap-6 overflow-y-auto columns-1 sm:columns-2 lg:columns-4"
 			style={{
-				display: 'grid',
-				gridTemplateColumns: 'repeat(3, 1fr)',
-				gap: '36px',
 				padding: '20px',
 				boxSizing: 'border-box',
-				overflowY: 'auto',
 				maxHeight: '100%',
 			}}
 			id="youtube-playlist"

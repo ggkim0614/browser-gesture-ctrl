@@ -305,8 +305,8 @@ export default function HandPoseDetection() {
 							}}
 						>
 							<svg
-								width="84"
-								height="71"
+								width="105"
+								height="89"
 								viewBox="0 0 205 173"
 								fill="none"
 								xmlns="http://www.w3.org/2000/svg"

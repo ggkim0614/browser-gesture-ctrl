@@ -30,7 +30,7 @@ const FloatingToolbar = ({
 				<div className="flex items-center space-x-4">
 					<button
 						onClick={() => videoControls.seekVideo(-10)}
-						className="text-3xl text-center font-jbm rounded-full cursor-pointer bg-[#757575] transition-colors hover:bg-[#525252] border-none px-9 py-9"
+						className="text-3xl text-center font-jbm rounded-full cursor-pointer bg-white text-neutral-800 transition-colors hover:bg-[#dfdfdf] border-none px-9 py-9"
 					>
 						–10
 					</button>
@@ -42,7 +42,7 @@ const FloatingToolbar = ({
 					</button>
 					<button
 						onClick={() => videoControls.seekVideo(10)}
-						className="text-3xl text-center font-jbm rounded-full cursor-pointer bg-[#757575] transition-colors hover:bg-[#525252] border-none px-9 py-9"
+						className="text-3xl text-center font-jbm rounded-full cursor-pointer bg-white transition-colors hover:bg-[#dfdfdf] border-none px-9 py-9 text-neutral-800"
 					>
 						+10
 					</button>

@@ -35,6 +35,7 @@ export default function HandPoseDetection() {
 		rightThumbTipPosX: 0,
 		rightThumbTipPosY: 0,
 	});
+
 	const [pinchStatus, setPinchStatus] = useState({
 		left: { isPinching: false, wasPinching: false },
 		right: { isPinching: false, wasPinching: false },
@@ -49,6 +50,20 @@ export default function HandPoseDetection() {
 	const handleResetZoom = () => {
 		setZoomLevel(100);
 		setZoomOrigin({ x: 0, y: 0 });
+	};
+
+	const handleRealClick = (x, y) => {
+		const element = document.elementFromPoint(x, y);
+		if (element) {
+			const clickEvent = new MouseEvent('click', {
+				view: window,
+				bubbles: true,
+				cancelable: true,
+				clientX: x,
+				clientY: y,
+			});
+			element.dispatchEvent(clickEvent);
+		}
 	};
 
 	useEffect(() => {
@@ -85,21 +100,6 @@ export default function HandPoseDetection() {
 	};
 
 	useEffect(() => {
-		const simulateEvent = (eventType, x, y) => {
-			const element = document.elementFromPoint(x, y);
-			if (element) {
-				const event = new MouseEvent(eventType, {
-					view: window,
-					bubbles: true,
-					cancelable: true,
-					clientX: x,
-					clientY: y,
-				});
-				element.dispatchEvent(event);
-			}
-			return element;
-		};
-
 		const handleZoom = () => {
 			if (pinchStatus.left.isPinching && pinchStatus.right.isPinching) {
 				const leftX = fingersPosition.leftIndexTipPosX;
@@ -152,27 +152,22 @@ export default function HandPoseDetection() {
 				!pinchStatus[hand].isPinching &&
 				pinchStatus[hand].wasPinching
 			) {
-				// Pinch end
+				// Pinch end (click)
 				if (!isZooming) {
-					const element = simulateEvent('click', x, y);
-					if (element && element.closest('#youtube-player-modal')) {
-						// Only close if clicking outside the video player
-						if (!element.closest('.youtube-player-content')) {
-							handleVideoSelect(null);
-						}
-					} else if (
-						element &&
-						element.classList.contains('reset-zoom-button')
-					) {
-						// If the clicked element is the reset zoom button, call handleResetZoom
-						handleResetZoom();
-					}
+					handleRealClick(x, y);
 				}
 				setScrollStartY((prev) => ({ ...prev, [hand]: null }));
 			}
 
 			// Always simulate mousemove for hover effects
-			simulateEvent('mousemove', x, y);
+			const moveEvent = new MouseEvent('mousemove', {
+				view: window,
+				bubbles: true,
+				cancelable: true,
+				clientX: x,
+				clientY: y,
+			});
+			document.elementFromPoint(x, y)?.dispatchEvent(moveEvent);
 		});
 
 		handleZoom();

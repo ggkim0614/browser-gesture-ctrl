@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React from 'react';
 import YouTubePlaylist from './components/YouTubePlaylist';
 import YouTubePlayerModal from './components/YoutubePlayerModal';
 
@@ -42,6 +42,7 @@ const Content = ({ zoomLevel, zoomOrigin, onVideoSelect, selectedVideoId }) => {
 				<YouTubePlayerModal
 					videoId={selectedVideoId}
 					onClose={handleCloseModal}
+					style={{ zIndex: 10000 }} // Add this line
 				/>
 			)}
 		</div>

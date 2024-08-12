@@ -87,7 +87,7 @@ const YouTubePlaylist = ({ onVideoSelect }) => {
 							className="z-50 absolute inset-0 bg-blue-500 bg-opacity-50 flex items-center justify-center text-center"
 							style={{ pointerEvents: 'none' }}
 						>
-							<span className="text-white text-xl font-bold">
+							<span className="text-white text-xl font-bold px-2">
 								Click again to start playing
 							</span>
 						</div>

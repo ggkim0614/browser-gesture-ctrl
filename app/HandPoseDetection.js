@@ -9,6 +9,7 @@ import { useAnimationFrame } from '../lib/hooks/useAnimationFrame';
 import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
 import Content from './Content';
 import FloatingToolbar from './components/Toolbar';
+import YouTubePlayerModal from './components/YoutubePlayerModal';
 
 tfjsWasm.setWasmPaths(
 	`https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm`
@@ -43,8 +44,22 @@ export default function HandPoseDetection() {
 	const [selectedVideoId, setSelectedVideoId] = useState(null);
 	const [isClient, setIsClient] = useState(false);
 
+	const [videoControls, setVideoControls] = useState(null);
+	const [isVideoOpen, setIsVideoOpen] = useState(false);
+
 	const handleVideoSelect = (videoId) => {
 		setSelectedVideoId(videoId);
+		setIsVideoOpen(true);
+	};
+
+	const handleCloseVideo = () => {
+		setSelectedVideoId(null);
+		setIsVideoOpen(false);
+		setVideoControls(null);
+	};
+
+	const handleControlsReady = (controls) => {
+		setVideoControls(controls);
 	};
 
 	const handleResetZoom = () => {
@@ -110,7 +125,6 @@ export default function HandPoseDetection() {
 				const currentDistance = Math.hypot(rightX - leftX, rightY - leftY);
 
 				if (!isZooming) {
-					// Start of zooming
 					setIsZooming(true);
 					const midX = (leftX + rightX) / 2;
 					const midY = (leftY + rightY) / 2;
@@ -122,7 +136,7 @@ export default function HandPoseDetection() {
 					const dampeningFactor = 0.5;
 					const zoomFactor = 1 + (distanceRatio - 1) * dampeningFactor;
 					const newZoomLevel = zoomLevel * zoomFactor;
-					const clampedZoomLevel = Math.max(50, Math.min(300, newZoomLevel));
+					const clampedZoomLevel = Math.max(100, Math.min(300, newZoomLevel)); // Changed minimum zoom to 100
 					setZoomLevel(clampedZoomLevel);
 				}
 
@@ -237,18 +251,47 @@ export default function HandPoseDetection() {
 
 	return (
 		<div>
-			<Content
-				zoomLevel={zoomLevel}
-				zoomOrigin={zoomOrigin}
-				onVideoSelect={handleVideoSelect}
-				selectedVideoId={selectedVideoId}
-			/>
+			<div
+				style={{
+					transform: `scale(${zoomLevel / 100})`,
+					transformOrigin: `${zoomOrigin.x}px ${zoomOrigin.y}px`,
+					transition: 'transform 0.1s ease-out',
+				}}
+			>
+				<Content
+					zoomLevel={zoomLevel}
+					zoomOrigin={zoomOrigin}
+					onVideoSelect={handleVideoSelect}
+					selectedVideoId={selectedVideoId}
+				/>
+			</div>
+			{isVideoOpen && (
+				<div
+					style={{
+						position: 'fixed',
+						top: 0,
+						left: 0,
+						width: '100%',
+						height: '100%',
+						zIndex: 10000,
+						transform: `scale(${zoomLevel / 100})`,
+						transformOrigin: `${zoomOrigin.x}px ${zoomOrigin.y}px`,
+						transition: 'transform 0.1s ease-out',
+					}}
+				>
+					<YouTubePlayerModal
+						videoId={selectedVideoId}
+						onClose={handleCloseVideo}
+						onControlsReady={handleControlsReady}
+					/>
+				</div>
+			)}
 			{isClient && (
 				<>
 					{['left', 'right'].map((hand) => (
 						<div
 							key={hand}
-							className={`absolute cursor-${hand} z-10`}
+							className={`absolute cursor-${hand} z-[99999]`}
 							style={{
 								position: 'absolute',
 								top: `${fingersPosition[`${hand}IndexTipPosY`]}px`,
@@ -307,9 +350,14 @@ export default function HandPoseDetection() {
 					<FloatingToolbar
 						zoomLevel={zoomLevel}
 						onResetZoom={handleResetZoom}
+						isVideoOpen={isVideoOpen}
+						videoControls={videoControls}
+						onCloseVideo={handleCloseVideo}
 						style={{
+							position: 'fixed',
 							left: '50%',
 							transform: 'translateX(-50%)',
+							zIndex: 10000,
 						}}
 					/>
 				</>

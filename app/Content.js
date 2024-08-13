@@ -28,7 +28,7 @@ const Content = ({ zoomLevel, zoomOrigin, onVideoSelect, selectedVideoId }) => {
 					<div className="opacity-50">v1.0</div>
 				</span>
 				<div className="font-medium text-gray-500">
-					All work crafted by&nbsp;
+					Crafted by&nbsp;
 					<a
 						href="https://georgekim.studio/"
 						className="font-semibold text-blue-500 hover:underline"
